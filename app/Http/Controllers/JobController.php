@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Job;
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class JobController extends Controller
 {
@@ -22,8 +22,17 @@ class JobController extends Controller
         return view('jobs.show', ['job' => $job]);
     }
 
+
+
     public function edit(Job $job)
     {
+
+        if (Auth::guest()) {
+            return redirect('/login');
+        }
+
+        Gate::authorize('edit-job', $job); //allows denies
+
         return view('jobs.edit', ['job' => $job]);
     }
     public function store()
@@ -36,7 +45,7 @@ class JobController extends Controller
         Job::create([
             'title' => Request()->title,
             'salary' => Request()->salary,
-            'employer_id' => 1
+            'employer_id' => Auth::user()->id,
         ]);
 
         return redirect('/jobs');
